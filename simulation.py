@@ -3,15 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import radians, cos, sin, asin, sqrt
 
-# --- CONFIGURAÇÕES ---
 ARQUIVO_DADOS = 'bin-sensors-ubidots-historical.csv'
 CAPACIDADE_LIXEIRA_MM = 950.0 
-LIMIAR_COLETA = 70.0  # Coletar apenas acima de 70%
+LIMIAR_COLETA = 70.0  
 
-# Configuração visual dos gráficos
 plt.style.use('ggplot') 
-
-# --- FUNÇÕES AUXILIARES ---
 
 def haversine(lon1, lat1, lon2, lat2):
     """Calcula distância entre dois pontos (Haversine) em km"""
@@ -29,7 +25,6 @@ def calcular_rota_nn(df_locations):
         return 0.0
     
     locations = df_locations.copy()
-    # Assume que começa na primeira lixeira (ou garagem hipotética)
     atual = locations.iloc[0]
     nao_visitados = locations.iloc[1:].copy()
     distancia_total = 0.0
@@ -55,9 +50,8 @@ def carregar_e_tratar():
     
     print("2. Tratando geolocalização e timestamps...")
     df['Time'] = pd.to_datetime(df['Time'], utc=True)
-    df['Date'] = df['Time'].dt.date # Extrair apenas a data
+    df['Date'] = df['Time'].dt.date 
     
-    # Extrair Lat/Lon
     def parse_geo(geo_str):
         try:
             if isinstance(geo_str, str):
@@ -77,14 +71,8 @@ def carregar_e_tratar():
     
     return df
 
-# --- MOTOR DE SIMULAÇÃO (LOOP TEMPORAL) ---
-
 def rodar_simulacao():
     df = carregar_e_tratar()
-    
-    # Agrupar dados por Dia (Snapshot diário às 8:00 não é necessário aqui, 
-    # vamos pegar a média ou último status do dia para simplificar a série histórica)
-    # Melhor: Pegar o último status registrado de cada sensor em cada dia único.
     
     dias_unicos = sorted(df['Date'].unique())
     print(f"3. Iniciando simulação para {len(dias_unicos)} dias de operação...")
@@ -92,17 +80,14 @@ def rodar_simulacao():
     resultados = []
     
     for dia in dias_unicos:
-        # Filtrar dados daquele dia
         df_dia_full = df[df['Date'] == dia]
         
-        # Pegar o último status de cada lixeira nesse dia
         df_estado_dia = df_dia_full.sort_values('Time').groupby('Ubidots Apilabel').last().reset_index()
         
-        # Ignorar dias com poucos dados (erros de sensor ou fim de semana sem coleta)
         if len(df_estado_dia) < 10: 
             continue
-            
-        # --- CENÁRIO A: Rota Fixa (Visita todos os sensores ativos) ---
+
+         # --- CENÁRIO A: Rota Fixa (Visita todos os sensores ativos) ---
         dist_fixa = calcular_rota_nn(df_estado_dia)
         paradas_fixa = len(df_estado_dia)
         
@@ -170,8 +155,6 @@ def rodar_simulacao():
     indices = np.arange(len(df_res))
     width = 0.35
     
-    # Vamos pegar apenas os primeiros 15 dias para o gráfico não ficar poluido, ou agrupar por semana
-    # Para o artigo, um recorte de 1 mês costuma ser bom. Vamos pegar Setembro.
     df_set = df_res[(pd.to_datetime(df_res['Data']) >= pd.to_datetime('2025-09-01')) & 
                     (pd.to_datetime(df_res['Data']) <= pd.to_datetime('2025-09-30'))]
     
