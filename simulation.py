@@ -154,10 +154,10 @@ def rodar_simulacao():
     
     # Gráfico 1: Comparativo Diário de Distância
     plt.figure(figsize=(12, 6))
-    plt.plot(df_res['Data'], df_res['Distancia_Fixa'], label='Rota Fixa (Tradicional)', color='red', alpha=0.7)
+    plt.plot(df_res['Data'], df_res['Distancia_Fixa'], label='Rota Tradicional', color='red', alpha=0.7)
     plt.plot(df_res['Data'], df_res['Distancia_Smart'], label='Rota Otimizada (IoT)', color='green', linewidth=2)
     plt.fill_between(df_res['Data'], df_res['Distancia_Smart'], df_res['Distancia_Fixa'], color='green', alpha=0.1, label='Economia Gerada')
-    plt.title('Comparativo de Distância Percorrida: Fixo vs Smart')
+    plt.title('Distância Percorrida (KM): Tradicional vs Otimizada ')
     plt.ylabel('Distância (km)')
     plt.xlabel('Data')
     plt.legend()
@@ -176,9 +176,9 @@ def rodar_simulacao():
                     (pd.to_datetime(df_res['Data']) <= pd.to_datetime('2025-09-30'))]
     
     plt.bar(df_set['Data'], df_set['Paradas_Fixa'], width=0.4, label='Paradas Totais (Cenário Fixo)', color='gray')
-    plt.bar(df_set['Data'], df_set['Paradas_Smart'], width=0.4, label='Paradas Necessárias (Cenário Smart)', color='green')
+    plt.bar(df_set['Data'], df_set['Paradas_Smart'], width=0.4, label='Paradas Necessárias (Cenário Otimizado)', color='green')
     
-    plt.title('Eficiência Operacional: Paradas Realizadas vs Necessárias (Setembro 2025)')
+    plt.title('Paradas: Realizadas vs. Necessárias')
     plt.ylabel('Número de Coletas')
     plt.xticks(rotation=45)
     plt.legend()
